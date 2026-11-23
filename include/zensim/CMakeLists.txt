@@ -233,6 +233,7 @@ set(ZENSIM_LIBRARY_CUDA_INCLUDE_FILES
   cuda/CudaLaunchConfig.cuh
   cuda/profile/CudaTimers.cuh
   cuda/memory/MemOps.hpp
+  cuda/memory/TransferProfiler.hpp
   cuda/memory/Allocator.h
   cuda/math/matrix/EigenDecomposition.cuh
   cuda/math/matrix/svd.cuh
@@ -570,6 +571,9 @@ if(ZS_ENABLE_CUDA)
   set_target_properties(zpccuda
     PROPERTIES POSITION_INDEPENDENT_CODE ON
   )
+
+  option(ZS_ENABLE_TRANSFER_PROFILER "Count explicit CUDA memory-copy calls and requested bytes" OFF)
+  target_compile_definitions(zpccuda PRIVATE ZS_ENABLE_TRANSFER_PROFILER=$<BOOL:${ZS_ENABLE_TRANSFER_PROFILER}>)
 
   target_link_libraries(zpccuda PUBLIC zpc_cuda_deps zpccore CUDA::nvrtc) # cuda_runtime cuda cudadevrt nvrtc cusolver cublas cusparse
   target_link_libraries(zpccuda PRIVATE zpc_cuda_arch_options)
