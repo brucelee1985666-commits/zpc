@@ -2,6 +2,8 @@
 
 #include <cuda.h>
 
+#include "zensim/cuda/memory/TransferProfiler.hpp"
+
 #include <iostream>
 
 #include "zensim/Logger.hpp"
@@ -81,19 +83,35 @@ namespace zs {
   void copy(device_mem_tag, void *dst, void *src, size_t size, const source_location &loc) {
     /// @note
     /// https://docs.nvidia.com/cuda/cuda-driver-api/api-sync-behavior.html#api-sync-behavior__memcpy-sync
-    cuMemcpy((CUdeviceptr)dst, (CUdeviceptr)src, size);
+    const CUresult copyResult = cuMemcpy((CUdeviceptr)dst, (CUdeviceptr)src, size);
+#if defined(ZS_ENABLE_TRANSFER_PROFILER) && ZS_ENABLE_TRANSFER_PROFILER
+    if (copyResult == CUDA_SUCCESS)
+      transfer_profile::record(transfer_profile::Direction::Generic, size);
+#endif
     // cudaDeviceSynchronize();
   }
   void copyHtoD(device_mem_tag, void *dst, void *src, size_t size, const source_location &loc) {
-    cuMemcpyHtoD((CUdeviceptr)dst, (void *)src, size);
+    const CUresult copyResult = cuMemcpyHtoD((CUdeviceptr)dst, (void *)src, size);
+#if defined(ZS_ENABLE_TRANSFER_PROFILER) && ZS_ENABLE_TRANSFER_PROFILER
+    if (copyResult == CUDA_SUCCESS)
+      transfer_profile::record(transfer_profile::Direction::HtoD, size);
+#endif
     // cudaDeviceSynchronize();
   }
   void copyDtoH(device_mem_tag, void *dst, void *src, size_t size, const source_location &loc) {
-    cuMemcpyDtoH((void *)dst, (CUdeviceptr)src, size);
+    const CUresult copyResult = cuMemcpyDtoH((void *)dst, (CUdeviceptr)src, size);
+#if defined(ZS_ENABLE_TRANSFER_PROFILER) && ZS_ENABLE_TRANSFER_PROFILER
+    if (copyResult == CUDA_SUCCESS)
+      transfer_profile::record(transfer_profile::Direction::DtoH, size);
+#endif
     // cudaDeviceSynchronize();
   }
   void copyDtoD(device_mem_tag, void *dst, void *src, size_t size, const source_location &loc) {
-    cuMemcpyDtoD((CUdeviceptr)dst, (CUdeviceptr)src, size);
+    const CUresult copyResult = cuMemcpyDtoD((CUdeviceptr)dst, (CUdeviceptr)src, size);
+#if defined(ZS_ENABLE_TRANSFER_PROFILER) && ZS_ENABLE_TRANSFER_PROFILER
+    if (copyResult == CUDA_SUCCESS)
+      transfer_profile::record(transfer_profile::Direction::DtoD, size);
+#endif
     // cudaDeviceSynchronize();
   }
 
@@ -163,16 +181,32 @@ namespace zs {
     cuMemsetD8((CUdeviceptr)addr, chval, size);
   }
   void copy(um_mem_tag, void *dst, void *src, size_t size, const source_location &loc) {
-    cuMemcpy((CUdeviceptr)dst, (CUdeviceptr)src, size);
+    const CUresult copyResult = cuMemcpy((CUdeviceptr)dst, (CUdeviceptr)src, size);
+#if defined(ZS_ENABLE_TRANSFER_PROFILER) && ZS_ENABLE_TRANSFER_PROFILER
+    if (copyResult == CUDA_SUCCESS)
+      transfer_profile::record(transfer_profile::Direction::Generic, size);
+#endif
   }
   void copyHtoD(um_mem_tag, void *dst, void *src, size_t size, const source_location &loc) {
-    cuMemcpyHtoD((CUdeviceptr)dst, (void *)src, size);
+    const CUresult copyResult = cuMemcpyHtoD((CUdeviceptr)dst, (void *)src, size);
+#if defined(ZS_ENABLE_TRANSFER_PROFILER) && ZS_ENABLE_TRANSFER_PROFILER
+    if (copyResult == CUDA_SUCCESS)
+      transfer_profile::record(transfer_profile::Direction::HtoD, size);
+#endif
   }
   void copyDtoH(um_mem_tag, void *dst, void *src, size_t size, const source_location &loc) {
-    cuMemcpyDtoH((void *)dst, (CUdeviceptr)src, size);
+    const CUresult copyResult = cuMemcpyDtoH((void *)dst, (CUdeviceptr)src, size);
+#if defined(ZS_ENABLE_TRANSFER_PROFILER) && ZS_ENABLE_TRANSFER_PROFILER
+    if (copyResult == CUDA_SUCCESS)
+      transfer_profile::record(transfer_profile::Direction::DtoH, size);
+#endif
   }
   void copyDtoD(um_mem_tag, void *dst, void *src, size_t size, const source_location &loc) {
-    cuMemcpyDtoD((CUdeviceptr)dst, (CUdeviceptr)src, size);
+    const CUresult copyResult = cuMemcpyDtoD((CUdeviceptr)dst, (CUdeviceptr)src, size);
+#if defined(ZS_ENABLE_TRANSFER_PROFILER) && ZS_ENABLE_TRANSFER_PROFILER
+    if (copyResult == CUDA_SUCCESS)
+      transfer_profile::record(transfer_profile::Direction::DtoD, size);
+#endif
   }
   void advise(um_mem_tag, std::string advice, void *addr, size_t bytes, ProcID did,
               const source_location &loc) {
